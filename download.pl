@@ -17,18 +17,24 @@ unless ( Log::Log4perl->initialized() ) {
     Log::Log4perl->init( \$config );
 }
 
-my $path = "database.sqlite3";
+# =================================
+# = database stuff: create the db =
+# =================================
+my $path        = "database.sqlite3";
+my $createTable = ( !-e $path );
 
 my $db = DBI->connect( "dbi:SQLite:$path", "", "" );
-if ( !defined($db) ) {
-    exit 1;
+exit 1 if !defined($db);
+
+if ($createTable) {
+    my $longLine = 'CREATE TABLE "song" (
+        "type" TEXT); ';
+    $db->do($longLine) or die "$DBI::errstr\n";
 }
 
-# my $longLine = 'CREATE TABLE "song" (
-#     "type" TEXT); ';
-#
-# $db->do($longLine) or die "$DBI::errstr\n";
-
+# ==============================
+# = pull down the popular feed =
+# ==============================
 my $popularFile = "feed.popular.xml";
 my $popularUrl  = "http://hypem.com/feed/popular/lastweek/1/feed.xml";
 
@@ -41,6 +47,10 @@ if ( !-e $popularFile ) {
 else {
     DEBUG("file $popularFile already exists");
 }
+
+# ===================
+# = start to parse! =
+# ===================
 
 use XML::Parser;
 
