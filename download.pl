@@ -55,4 +55,4 @@ else {
 use XML::Parser;
 
 my $p1 = new XML::Parser( Style => 'Tree' );
-$p1->parsefile($popularFile);
+DEBUG( Dumper($p1->parsefile($popularFile)) );
