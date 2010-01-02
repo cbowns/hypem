@@ -55,4 +55,18 @@ else {
 use XML::Parser;
 
 my $p1 = new XML::Parser( Style => 'Tree' );
-DEBUG( Dumper($p1->parsefile($popularFile)) );
+DEBUG( Dumper( $p1->parsefile($popularFile) ) );
+
+
+
+
+
+
+
+
+
+
+
+# twitter will be harder.
+# curl -A "Mozilla/4.0 (compatible; MSIE 5.01; Windows NT 5.0)"
+# I want: http://hypem.com/twitter/popular/lastweek/1/ THROUGH http://hypem.com/#/twitter/popular/lastweek/5/
