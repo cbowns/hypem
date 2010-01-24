@@ -79,7 +79,10 @@ foreach my $currentSearch (@search) {
 	  findUntil( $currentLevel, $currentSearch,
 		( $currentSearch =~ "http" ? 1 : 0 ) );
 }
-$logger->debug( "Currently found: " . Dumper($currentLevel) );
+
+# twitter will be harder.
+# curl -A "Mozilla/4.0 (compatible; MSIE 5.01; Windows NT 5.0)"
+# I want: http://hypem.com/twitter/popular/lastweek/1/ THROUGH http://hypem.com/#/twitter/popular/lastweek/5/
 
 =head2 findUntil
 
@@ -115,6 +118,12 @@ sub findUntil {
 	}
 }
 
-# twitter will be harder.
-# curl -A "Mozilla/4.0 (compatible; MSIE 5.01; Windows NT 5.0)"
-# I want: http://hypem.com/twitter/popular/lastweek/1/ THROUGH http://hypem.com/#/twitter/popular/lastweek/5/
+# Removes leading and trailing whitespace
+sub trim {
+	my $string = shift(@_);
+
+	$string =~ s/^\s+//;
+	$string =~ s/\s+$//;
+
+	return $string;
+}
