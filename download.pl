@@ -72,12 +72,42 @@ use XML::Parser;
 my $p1 = new XML::Parser( Style => 'Tree' );
 my $popularTree = $p1->parsefile($popularFile);
 
-my @search = ( 'rss', 'channel', 'item', 'link', 'http://hypem.com' );
-my $currentLevel = $popularTree;
-foreach my $currentSearch (@search) {
-	$currentLevel =
-	  findUntil( $currentLevel, $currentSearch,
-		( $currentSearch =~ "http" ? 1 : 0 ) );
+{
+	my @search = ( 'rss', 'channel', 'item', 'link', 'http://hypem.com' );
+	my $currentLevel = $popularTree;
+	foreach my $currentSearch (@search) {
+		$currentLevel =
+		  findUntil( $currentLevel, $currentSearch,
+			( $currentSearch =~ "http" ? 1 : 0 ) );
+	}
+	$logger->debug( "Currently found: " . Dumper($currentLevel) );
+}
+
+{
+	my @search = ( 'rss', 'channel', 'item', 'title');
+	my $currentLevel = $popularTree;
+	foreach my $currentSearch (@search) {
+		$currentLevel =
+		  findUntil( $currentLevel, $currentSearch );
+	}
+	$currentLevel = $currentLevel->[2];
+	$currentLevel = trim($currentLevel);
+	$logger->debug( "Currently found: " . Dumper($currentLevel) );
+}
+
+{
+	my @search = ( 'rss', 'channel', 'item');
+	my $currentLevel = $popularTree;
+	foreach my $currentSearch (@search) {
+		$currentLevel =
+		  findUntil( $currentLevel, $currentSearch );
+	}
+
+	my $name = ''; #"title", ->[2]
+	my $url = ''; #
+	my $date = "pubDate";
+
+	$logger->debug( "Currently: name: $name, URL: $url date: $date");
 }
 
 # twitter will be harder.
