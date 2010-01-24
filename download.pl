@@ -79,10 +79,15 @@ my $popularTree = $p1->parsefile($popularFile);
 		$currentLevel = findUntil( $currentLevel, $currentSearch );
 	}
 
-	#"title", ->[2]
-	my $name = trim( findUntil( $currentLevel, 'title' )->[2] );
-	my $url  = '';
-	my $date = "pubDate";
+	my $name = findUntil( $currentLevel, 'title' );
+	$name = $name->[2];
+	$name = trim($name);
+
+	my $url = findUntil( $currentLevel, 'link' );
+	$url = findUntil( $url, 'http://hypem.com', 1 );
+
+	my $date = findUntil( $currentLevel, 'pubDate' );
+	$date = $date->[2];
 
 	$logger->debug("Currently: name: $name, URL: $url date: $date");
 }
