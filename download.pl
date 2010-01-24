@@ -63,9 +63,9 @@ else {
 	DEBUG("file $popularFile already exists, using filesystem cache");
 }
 
-# ===================
-# = start to parse! =
-# ===================
+# ==========================
+# = parse the popular feed =
+# ==========================
 
 use XML::Parser;
 
@@ -99,7 +99,6 @@ my $popularTree = $p1->parsefile($popularFile);
 =head2 findUntil
 
 Finds the array item that matches searchString (I'm doing a =~ with it), and returns $arrayRef->[position + 1].
-
 
 Usage:
 
