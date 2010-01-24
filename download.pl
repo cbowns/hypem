@@ -84,11 +84,10 @@ my $popularTree = $p1->parsefile($popularFile);
 }
 
 {
-	my @search = ( 'rss', 'channel', 'item', 'title');
+	my @search = ( 'rss', 'channel', 'item', 'title' );
 	my $currentLevel = $popularTree;
 	foreach my $currentSearch (@search) {
-		$currentLevel =
-		  findUntil( $currentLevel, $currentSearch );
+		$currentLevel = findUntil( $currentLevel, $currentSearch );
 	}
 	$currentLevel = $currentLevel->[2];
 	$currentLevel = trim($currentLevel);
@@ -96,18 +95,19 @@ my $popularTree = $p1->parsefile($popularFile);
 }
 
 {
-	my @search = ( 'rss', 'channel', 'item');
+	my @search = ( 'rss', 'channel', 'item' );
 	my $currentLevel = $popularTree;
 	foreach my $currentSearch (@search) {
-		$currentLevel =
-		  findUntil( $currentLevel, $currentSearch );
+		$currentLevel = findUntil( $currentLevel, $currentSearch );
 	}
+	$logger->debug( "Currently found: " . Dumper($currentLevel) );
 
-	my $name = ''; #"title", ->[2]
-	my $url = ''; #
+	#"title", ->[2]
+	my $name = trim( findUntil( $currentLevel, 'title' )->[2] );
+	my $url  = '';
 	my $date = "pubDate";
 
-	$logger->debug( "Currently: name: $name, URL: $url date: $date");
+	$logger->debug("Currently: name: $name, URL: $url date: $date");
 }
 
 # twitter will be harder.
