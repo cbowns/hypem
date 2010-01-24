@@ -30,9 +30,21 @@ my $db = DBI->connect( "dbi:SQLite:$path", "", "" );
 exit 1 if !defined($db);
 
 if ($createTable) {
-	my $longLine = 'CREATE TABLE "song" (
-		"type" TEXT); ';
-	$db->do($longLine) or die "$DBI::errstr\n";
+	DEBUG("creating a new table");
+
+	my $firstTable = 'CREATE TABLE "song" (
+		"ID" integer not null primary key autoincrement,
+		"name" text,
+"date added" text ); ';
+
+	$db->do($firstTable) or die "$DBI::errstr\n";
+
+	my $secondTable = 'create table "url" (
+		"ID" integer not null primary key autoincrement,
+		"url" text,
+"songID" integer ); ';
+
+	$db->do($secondTable) or die "$DBI::errstr\n";
 }
 
 # ==============================
