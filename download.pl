@@ -50,19 +50,22 @@ if ($createTable) {
 # ==============================
 # = pull down the popular feed =
 # ==============================
-my $popularFile = "feed.popular.xml";
 
-# feeds are 1-5:
-my $popularUrl = "http://hypem.com/feed/popular/lastweek/1/feed.xml";
+my @count = ( 1, 2, 3, 4, 5 );
+foreach my $number (@count) {
+	my $popularFile = "feed.popular.$number.xml";
 
-if ( !-e $popularFile ) {
-	$logger->debug("curling the url: $popularUrl");
+	# feeds are 1-5:
+	my $popularUrl = "http://hypem.com/feed/popular/lastweek/$number/feed.xml";
 
-	# `curl http://cbowns.com/ -o $popularFile`;
-`curl -A "Mozilla/4.0 (compatible; MSIE 5.01; Windows NT 5.0)" $popularUrl -o feed.popular.xml`;
-}
-else {
-	$logger->debug("file $popularFile already exists, using filesystem cache");
+	if ( !-e $popularFile ) {
+		$logger->debug("curling the url: $popularUrl");
+`curl -A "Mozilla/4.0 (compatible; MSIE 5.01; Windows NT 5.0)" $popularUrl -o $popularFile`;
+	}
+	else {
+		$logger->debug(
+			"file $popularFile already exists, using filesystem cache");
+	}
 }
 
 # ==========================
