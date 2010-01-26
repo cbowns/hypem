@@ -122,7 +122,10 @@ If you want $arrayRef->[position], pass a 1 for literalMatch:
 sub findUntil {
 	my ( $itemRef, $searchString, $literalMatch ) =
 	  validate_pos( @_, 1, 1, { default => 0 } );
-	$logger->debug("sub findUntil: looking for $searchString, literalMatch is $literalMatch");
+
+	# 	$logger->debug(
+	# "sub findUntil: looking for $searchString, literalMatch is $literalMatch"
+	# 	);
 
 	my $count = 0;
 	foreach my $test ( @{$itemRef} ) {
