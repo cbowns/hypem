@@ -81,25 +81,21 @@ foreach my $currentSearch (@search) {
 	$findRoot = findUntil( $findRoot, $currentSearch );
 }
 
-my $treeRoot = $findRoot;
-$logger->debug( Dumper($treeRoot) );
+# get a list of items
+my $items = treeToArray( $findRoot, 'item' );
+foreach my $item ( @{$items} ) {
 
-my $i = 0;
-while ( $i++ < 10 ) {
-	my $currentLevel = findUntil( $treeRoot, 'item' );
-
-	my $name = findUntil( $currentLevel, 'title' );
+	my $name = findUntil( $item, 'title' );
 	$name = $name->[2];
 	$name = trim($name);
 
-	my $url = findUntil( $currentLevel, 'link' );
+	my $url = findUntil( $item, 'link' );
 	$url = findUntil( $url, 'http://hypem.com', 1 );
 
-	my $date = findUntil( $currentLevel, 'pubDate' );
+	my $date = findUntil( $item, 'pubDate' );
 	$date = $date->[2];
 
 	$logger->debug("Currently: name: $name, URL: $url date: $date");
-
 }
 
 # twitter will be harder.
@@ -162,20 +158,19 @@ Usage:
 
 sub treeToArray {
 	my ( $treeRoot, $searchString ) = validate_pos( @_, 1, 1 );
-	
-	$logger->debug("sub treeToArray: looking at $treeRoot for $searchString items");
 
-# todo replace these this is a bogus method body:
+	$logger->debug("sub treeToArray: looking for items matching $searchString");
+
+	my @return;
+
 	my $count = 0;
-	foreach my $test ( @{$itemRef} ) {
-		if ( defined( $itemRef->[$count] ) ) {
-			return $itemRef->[ $count + ( $literalMatch ? 0 : 1 ) ]
-			  if ( $itemRef->[$count] =~ $searchString );
+	foreach my $test ( @{$treeRoot} ) {
+		if ( defined( $treeRoot->[$count] ) ) {
+			push( @return, $treeRoot->[ $count + 1 ] )
+			  if ( $treeRoot->[$count] =~ $searchString );
 			$count++;
 		}
-		else {
-			$logger->error("never found $searchString, returning null");
-			return;
-		}
 	}
+
+	return \@return;
 }
