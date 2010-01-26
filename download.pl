@@ -51,7 +51,9 @@ if ($createTable) {
 # = pull down the popular feed =
 # ==============================
 my $popularFile = "feed.popular.xml";
-my $popularUrl  = "http://hypem.com/feed/popular/lastweek/1/feed.xml";
+
+# feeds are 1-5:
+my $popularUrl = "http://hypem.com/feed/popular/lastweek/1/feed.xml";
 
 if ( !-e $popularFile ) {
 	$logger->debug("curling the url: $popularUrl");
@@ -67,13 +69,13 @@ else {
 # = parse the popular feed =
 # ==========================
 
+# parse out the tree
 use XML::Parser;
-
 my $p1 = new XML::Parser( Style => 'Tree' );
 my $popularTree = $p1->parsefile($popularFile);
 
+# recurse down a bit to find the channel subtree:
 my @search = ( 'rss', 'channel' );
-
 my $findRoot = $popularTree;
 foreach my $currentSearch (@search) {
 	$findRoot = findUntil( $findRoot, $currentSearch );
