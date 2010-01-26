@@ -72,12 +72,18 @@ use XML::Parser;
 my $p1 = new XML::Parser( Style => 'Tree' );
 my $popularTree = $p1->parsefile($popularFile);
 
-{
-	my @search = ( 'rss', 'channel', 'item' );
-	my $currentLevel = $popularTree;
-	foreach my $currentSearch (@search) {
-		$currentLevel = findUntil( $currentLevel, $currentSearch );
-	}
+my @search = ( 'rss', 'channel' );
+
+my $findRoot = $popularTree;
+foreach my $currentSearch (@search) {
+	$findRoot = findUntil( $findRoot, $currentSearch );
+}
+
+my $treeRoot = $findRoot;
+
+my $i = 0;
+while ( $i++ < 10 ) {
+	my $currentLevel = findUntil( $treeRoot, 'item' );
 
 	my $name = findUntil( $currentLevel, 'title' );
 	$name = $name->[2];
@@ -90,6 +96,7 @@ my $popularTree = $p1->parsefile($popularFile);
 	$date = $date->[2];
 
 	$logger->debug("Currently: name: $name, URL: $url date: $date");
+
 }
 
 # twitter will be harder.
