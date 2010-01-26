@@ -30,19 +30,19 @@ my $db = DBI->connect( "dbi:SQLite:$path", "", "" );
 exit 1 if !defined($db);
 
 if ($createTable) {
-	DEBUG("creating a new table");
+	$logger->debug("creating a new table");
 
 	my $firstTable = 'CREATE TABLE "song" (
 		"ID" integer not null primary key autoincrement,
 		"name" text,
-"date added" text ); ';
+		"date added" text ); ';
 
 	$db->do($firstTable) or die "$DBI::errstr\n";
 
 	my $secondTable = 'create table "url" (
 		"ID" integer not null primary key autoincrement,
 		"url" text,
-"songID" integer ); ';
+		"songID" integer ); ';
 
 	$db->do($secondTable) or die "$DBI::errstr\n";
 }
@@ -54,13 +54,13 @@ my $popularFile = "feed.popular.xml";
 my $popularUrl  = "http://hypem.com/feed/popular/lastweek/1/feed.xml";
 
 if ( !-e $popularFile ) {
-	DEBUG("curling the url: $popularUrl");
+	$logger->debug("curling the url: $popularUrl");
 
 	# `curl http://cbowns.com/ -o $popularFile`;
 `curl -A "Mozilla/4.0 (compatible; MSIE 5.01; Windows NT 5.0)" $popularUrl -o feed.popular.xml`;
 }
 else {
-	DEBUG("file $popularFile already exists, using filesystem cache");
+	$logger->debug("file $popularFile already exists, using filesystem cache");
 }
 
 # ==========================
