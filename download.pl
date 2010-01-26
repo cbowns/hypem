@@ -80,6 +80,7 @@ foreach my $currentSearch (@search) {
 }
 
 my $treeRoot = $findRoot;
+$logger->debug( Dumper($treeRoot) );
 
 my $i = 0;
 while ( $i++ < 10 ) {
@@ -120,7 +121,7 @@ If you want $arrayRef->[position], pass a 1 for literalMatch:
 sub findUntil {
 	my ( $itemRef, $searchString, $literalMatch ) =
 	  validate_pos( @_, 1, 1, { default => 0 } );
-	$logger->debug("looking for $searchString, literalMatch is $literalMatch");
+	$logger->debug("sub findUntil: looking for $searchString, literalMatch is $literalMatch");
 
 	my $count = 0;
 	foreach my $test ( @{$itemRef} ) {
@@ -144,4 +145,35 @@ sub trim {
 	$string =~ s/\s+$//;
 
 	return $string;
+}
+
+=head2 treeToArray
+
+Convert a tree structure to an array of its first-level hashes.
+Give it a tree root a key that signifies your item (a la findUntil), and it'll push them into an array for you.
+
+Usage:
+
+	my @items = treeToArray($treeRoot, 'item');
+
+=cut
+
+sub treeToArray {
+	my ( $treeRoot, $searchString ) = validate_pos( @_, 1, 1 );
+	
+	$logger->debug("sub treeToArray: looking at $treeRoot for $searchString items");
+
+# todo replace these this is a bogus method body:
+	my $count = 0;
+	foreach my $test ( @{$itemRef} ) {
+		if ( defined( $itemRef->[$count] ) ) {
+			return $itemRef->[ $count + ( $literalMatch ? 0 : 1 ) ]
+			  if ( $itemRef->[$count] =~ $searchString );
+			$count++;
+		}
+		else {
+			$logger->error("never found $searchString, returning null");
+			return;
+		}
+	}
 }
