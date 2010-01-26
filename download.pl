@@ -7,6 +7,8 @@ use strict;
 use warnings;
 use Params::Validate;
 
+use XML::Parser;
+
 unless ( Log::Log4perl->initialized() ) {
 	my $config = '
 	log4perl.rootLogger                                 = DEBUG, Screen
@@ -47,6 +49,9 @@ if ($createTable) {
 	$db->do($secondTable) or die "$DBI::errstr\n";
 }
 
+# map of good ascii values
+my %good = map { $_ => 1 } ( 9, 10, 13, 32 .. 127 );
+
 # ==============================
 # = pull down the popular feed =
 # ==============================
@@ -61,44 +66,59 @@ foreach my $number (@count) {
 	if ( !-e $popularFile ) {
 		$logger->debug("curling the url: $popularUrl");
 `curl -A "Mozilla/4.0 (compatible; MSIE 5.01; Windows NT 5.0)" $popularUrl -o $popularFile`;
+
+		# slurp up the file
+		open FILE, "$popularFile";
+		my @lines = <FILE>;
+		close FILE;
+
+		# pull out non-ascii chars
+		open FILE, ">$popularFile" or die $!;
+		foreach my $line (@lines) {
+			$line =~ s/(.)/$good{ord($1)} ? $1 : ' '/eg;
+
+			# and shove them back into the file.
+			print FILE $line;
+		}
+		close FILE;
+
 	}
 	else {
 		$logger->debug(
 			"file $popularFile already exists, using filesystem cache");
 	}
-}
 
-# ==========================
-# = parse the popular feed =
-# ==========================
+	# ==========================
+	# = parse the popular feed =
+	# ==========================
 
-# parse out the tree
-use XML::Parser;
-my $p1 = new XML::Parser( Style => 'Tree' );
-my $popularTree = $p1->parsefile($popularFile);
+	# parse out the tree
+	my $p1 = new XML::Parser( Style => 'Tree' );
+	my $popularTree = $p1->parsefile($popularFile);
 
-# recurse down a bit to find the channel subtree:
-my @search = ( 'rss', 'channel' );
-my $findRoot = $popularTree;
-foreach my $currentSearch (@search) {
-	$findRoot = findUntil( $findRoot, $currentSearch );
-}
+	# recurse down a bit to find the channel subtree:
+	my @search = ( 'rss', 'channel' );
+	my $findRoot = $popularTree;
+	foreach my $currentSearch (@search) {
+		$findRoot = findUntil( $findRoot, $currentSearch );
+	}
 
-# get a list of items
-my $items = treeToArray( $findRoot, 'item' );
-foreach my $item ( @{$items} ) {
+	# get a list of items
+	my $items = treeToArray( $findRoot, 'item' );
+	foreach my $item ( @{$items} ) {
 
-	my $name = findUntil( $item, 'title' );
-	$name = $name->[2];
-	$name = trim($name);
+		my $name = findUntil( $item, 'title' );
+		$name = $name->[2];
+		$name = trim($name);
 
-	my $url = findUntil( $item, 'link' );
-	$url = findUntil( $url, 'http://hypem.com', 1 );
+		my $url = findUntil( $item, 'link' );
+		$url = findUntil( $url, 'http://hypem.com', 1 );
 
-	my $date = findUntil( $item, 'pubDate' );
-	$date = $date->[2];
+		my $date = findUntil( $item, 'pubDate' );
+		$date = $date->[2];
 
-	$logger->debug("Currently: name: $name, URL: $url date: $date");
+		$logger->debug("Currently: name: $name, URL: $url date: $date");
+	}
 }
 
 # twitter will be harder.
