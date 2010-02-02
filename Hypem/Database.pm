@@ -73,7 +73,7 @@ sub insert {
 
 	my $workRowID =
 	  $self->{db}->last_insert_id( undef, undef, '<table>', 'ID' );
-	$row->setID($workRowID);
+
 	return $workRowID;
 }
 
