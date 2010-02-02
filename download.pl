@@ -25,28 +25,12 @@ my $logger = Log::Log4perl::get_logger();
 # =================================
 # = database stuff: create the db =
 # =================================
-my $path        = "database.sqlite3";
-my $createTable = ( !-e $path );
+use Hypem::Database;
 
-my $db = DBI->connect( "dbi:SQLite:$path", "", "" );
-exit 1 if !defined($db);
-
-if ($createTable) {
-	$logger->debug("creating a new table");
-
-	my $firstTable = 'CREATE TABLE "song" (
-		"ID" integer not null primary key autoincrement,
-		"name" text,
-		"date added" text ); ';
-
-	$db->do($firstTable) or die "$DBI::errstr\n";
-
-	my $secondTable = 'create table "url" (
-		"ID" integer not null primary key autoincrement,
-		"url" text,
-		"songID" integer ); ';
-
-	$db->do($secondTable) or die "$DBI::errstr\n";
+my $db = Hypem::Database->new();
+if ( !defined($db) ) {
+	$logger->error("database came back undef; wtf?");
+	exit 1;
 }
 
 # map of good ascii values
@@ -56,7 +40,7 @@ my %good = map { $_ => 1 } ( 9, 10, 13, 32 .. 127 );
 # = pull down the popular feed =
 # ==============================
 
-my @count = ( 1, 2, 3, 4, 5 );
+my @count = ( 1 .. 5 );
 foreach my $number (@count) {
 	my $popularFile = "feed.popular.$number.xml";
 
