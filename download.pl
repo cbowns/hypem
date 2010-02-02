@@ -43,7 +43,7 @@ if ($createTable) {
 	$db->createTable();
 }
 
-# map of good ascii values
+# map of good ascii values for text filtering
 my %good = map { $_ => 1 } ( 9, 10, 13, 32 .. 127 );
 
 # ==============================
