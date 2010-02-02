@@ -27,10 +27,20 @@ my $logger = Log::Log4perl::get_logger();
 # =================================
 use Hypem::Database;
 
+my $dbPath = Hypem::Database::DEFAULT_DB_NAME();
+
+my $createTable = ( !-e $dbPath );
+
 my $db = Hypem::Database->new();
+
 if ( !defined($db) ) {
 	$logger->error("database came back undef; wtf?");
 	exit 1;
+}
+
+if ($createTable) {
+	$logger->debug("new DB file, creating the tables");
+	$db->createTable();
 }
 
 # map of good ascii values
