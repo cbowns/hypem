@@ -9,9 +9,11 @@ use Data::Dumper;
 use Log::Log4perl(":easy");
 use DBI;
 
+use constant DEFAULT_DB_NAME => "database.sqlite3";
+
 sub new {
 	my ( $class, $path ) =
-	  validate_pos( @_, 1, { default => "database.sqlite3" } );
+	  validate_pos( @_, 1, { default => DEFAULT_DB_NAME } );
 
 	my $db = DBI->connect( "dbi:SQLite:$path", "", "" );
 	if ( !defined($db) ) {
