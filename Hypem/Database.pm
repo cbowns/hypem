@@ -1,6 +1,16 @@
 package Hypem::Database;
 
-# perltidy -npro -pbp -l=100
+=head1 NAME
+
+Hypem::Database
+
+=cut
+
+=head1 SYNOPSIS
+
+    Some info on this should go here.
+
+=cut
 
 use strict;
 use warnings;
@@ -10,6 +20,12 @@ use Log::Log4perl(":easy");
 use DBI;
 
 use constant DEFAULT_DB_NAME => "database.sqlite3";
+
+=head2 new
+
+Create a new database file. A path argument is optional.
+
+=cut
 
 sub new {
 	my ( $class, $path ) =
@@ -23,7 +39,18 @@ sub new {
 	return $self;
 }
 
-# returns 1 on success, 0 on failure.
+=head2 createTable
+
+Creates the tables necessary to use this database.
+Returns 1 on success, 0 on failure.
+
+	if ( $db->createTable() ) {
+		# rock and roll time
+	} else {
+		# you should probably kill yourself. Er, I mean, kill your program.
+	}
+
+=cut
 
 sub createTable {
 	my ($self) = validate_pos( @_, 1 );
@@ -53,6 +80,15 @@ sub createTable {
 	return 1;
 }
 
+=head2 parseArgs
+
+Close out a database file by disconnecting from it and nulling out the pointer.
+
+	$db = $db->close();
+	# $db is now undef. best practice, yo.
+
+=cut
+
 sub close {
 	my ($self) = validate_pos( @_, 1 );
 
@@ -61,23 +97,43 @@ sub close {
 	return undef;
 }
 
+=head2 insert
+
+Insert stuff into the DB.
+
+=cut
+
+# TODO actually implement and test!
+
 sub insert {
 	my ( $self, $item ) = validate_pos( @_, 1, 0 );
 
 	# $item is a hashref with some stuff inside it.
 
+	# TODO fill in table name
 	my $sql = "insert into <> values ( NULL , "
+
+	  # TODO fill in item's key
 	  . join( ", ", map { $self->{db}->quote($_) } ( $item->{blah} ) ) . ")";
 
 	if ( !$self->{db}->do($sql) ) {
 		return -1;
 	}
 
+	# TODO fill in table name
 	my $workRowID =
 	  $self->{db}->last_insert_id( undef, undef, '<table>', 'ID' );
 
 	return $workRowID;
 }
+
+# TODO this doesn't really make sense, I have two tables
+
+=head2 removeRowForID
+
+Remove an item with id or somethin
+
+=cut
 
 sub removeRowForID {
 	my ( $self, $id ) = validate_pos( @_, 1, 1 );
@@ -86,17 +142,25 @@ sub removeRowForID {
 		return 0;
 	}
 
+	# TODO fill in table name
 	my $sql = "delete from <> where <>=" . $self->{db}->quote(<>);
 	return $self->{db}->do($sql);
 }
 
-sub markItemAsRunning {
+=head2 thingy
+
+do stuff to things
+
+=cut
+
+sub thingy {
 	my ( $self, $id ) = validate_pos( @_, 1, 1 );
 
 	if ( $id !~ /^[0-9]+$/ || $id < 1 ) {
 		return 0;
 	}
 
+	# TODO fill in table names, params to quote()
 	my $sql =
 	    "update <> set <>="
 	  . $self->{db}->quote(<>)
