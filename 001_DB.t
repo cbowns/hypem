@@ -5,7 +5,7 @@ use warnings;
 use Log::Log4perl(":easy");
 
 use Test::More;
-plan tests => 4;
+plan tests => 3;
 
 # let us look up our plib path and whatnot.
 use File::Basename;
