@@ -1,0 +1,8 @@
+todo:
+- clean up Database.pm
+- test the rest of DB.pm
+- start using the DB
+	parse the twitter feed:
+	- pull down one page of HTML
+	- start hacking at the page structure
+	- class out the parser so it's easy to swap out when they break the page structure.
