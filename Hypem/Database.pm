@@ -97,34 +97,44 @@ sub close {
 	return undef;
 }
 
+# TODO write unit test.
+
 =head2 insert
 
-Insert stuff into the DB.
+Inserts an item into the DB.
+
+preconditions: $item->{} has the keys: 'name', 'date added', and 'url'.
+postcondition: $item->{ID} will contain the ID of a row in song.
+
+Returns -1 on failure from either insert. You should probably die immediately before the database becomes inconsistent if this returns -1.
 
 =cut
 
-# TODO actually implement and test!
-
 sub insert {
-	my ( $self, $item ) = validate_pos( @_, 1, 0 );
+	my ( $self, $item ) = validate_pos( @_, 1, 1 );
 
-	# $item is a hashref with some stuff inside it.
-
-	# TODO fill in table name
-	my $sql = "insert into <> values ( NULL , "
-
-	  # TODO fill in item's key
-	  . join( ", ", map { $self->{db}->quote($_) } ( $item->{blah} ) ) . ")";
+	my $sql = "insert into song values ( NULL , "
+	  . join( ", ",
+		map { $self->{db}->quote($_) }
+		  ( $item->{'name'}, time ) )
+	  . ")";
 
 	if ( !$self->{db}->do($sql) ) {
 		return -1;
 	}
 
-	# TODO fill in table name
-	my $workRowID =
-	  $self->{db}->last_insert_id( undef, undef, '<table>', 'ID' );
+	$item->{ID} = $self->{db}->last_insert_id( undef, undef, 'song', 'ID' );
 
-	return $workRowID;
+	$sql = "insert into url values ( NULL , "
+	  . join( ", ",
+		map { $self->{db}->quote($_) } ( $item->{'url'}, $item->{'ID'} ) )
+	  . ")";
+
+	if ( !$self->{db}->do($sql) ) {
+		return -1;
+	}
+
+	return $item->{ID};
 }
 
 # TODO this doesn't really make sense, I have two tables

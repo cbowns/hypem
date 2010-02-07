@@ -5,7 +5,7 @@ use warnings;
 use Log::Log4perl(":easy");
 
 use Test::More;
-plan tests => 3;
+plan tests => 4;
 
 # let us look up our plib path and whatnot.
 use File::Basename;
@@ -30,6 +30,7 @@ my $db;    # global to this test.
 # ==========================
 useAndInstantiate();
 createTable();
+insertItems();
 
 # cleanup
 print "cleaning up. new database: ";
@@ -50,5 +51,12 @@ sub createTable {
 	ok( $db->createTable(), "table created successfully" );
 }
 
-exit;
+sub insertItems {
+	my $item = {};
+	$item->{name} = 'Test Song';
+	$item->{url}  = 'http://cbowns.com/testsong';
+	ok( $db->insert($item) > 0, "inserted an item" );
+}
 
+# is( $returnID, 1, "first inserted row has ID 1" );
+# isnt( $wr1->ID(), defined $wr1->ID(), "and the row has no ID defined yet" );
