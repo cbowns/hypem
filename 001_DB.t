@@ -16,11 +16,12 @@ sub nukeDB {
 	my $salt = int( rand(100000) );
 	my $path = "/tmp/db.$salt.sqlite3";
 	`rm -f $path`;
-	print "new path: $path\n";
+	print "$path\n";
 	return $path;
 }
 
 # Remove previous test file if it exists
+print "database for this test: ";
 my $path = nukeDB();
 my $db;    # global to this test.
 
@@ -31,6 +32,7 @@ useAndInstantiate();
 createTable();
 
 # cleanup
+print "cleaning up. new database: ";
 $path = nukeDB();
 
 sub useAndInstantiate {
