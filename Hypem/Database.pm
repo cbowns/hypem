@@ -57,7 +57,7 @@ sub createTable {
 
 	my $status = 0;
 
-	my $firstTable = 'CREATE TABLE "song" (
+	my $firstTable = 'create table "song" (
 		"ID" integer not null primary key autoincrement,
 		"name" text,
 		"date added" text ); ';
@@ -148,6 +148,30 @@ sub _insertItem {
 	}
 
 	return $item->{ID};
+}
+
+=head2 numberOfItems
+
+Get the number of items in the DB.
+
+=cut
+
+sub numberOfItems {
+	my ($self) = validate_pos( @_, 1 );
+
+	my $sql = "select count(id) from song";
+
+	return @{ $self->{db}->selectcol_arrayref($sql) }[0];
+}
+
+=head2 URLsForID
+
+Get an array of URLs for an ID
+
+=cut
+
+sub URLsForID {
+	my ( $self, $id ) = validate_pos( @_, 1, 1 );
 
 }
 

@@ -5,7 +5,7 @@ use warnings;
 use Log::Log4perl(":easy");
 
 use Test::More;
-plan tests => 5;
+plan tests => 7;
 
 # let us look up our plib path and whatnot.
 use File::Basename;
@@ -56,6 +56,8 @@ sub insertItems {
 	ok( $db->insert($item) > 0, "inserted an item" );
 	my $itemTwo = { name => 'Test Song', url => 'http://cbowns.com/testsong2' };
 	ok( $db->insert($itemTwo) > 0, "inserted a second item" );
+	is( $db->numberOfItems(),        1, "There's one item in the DB" );
+	is( scalar( $db->URLsForID(1) ), 2, "and there's two URLs for the item" );
 }
 
 # is( $returnID, 1, "first inserted row has ID 1" );
