@@ -112,6 +112,37 @@ Returns -1 on failure from either insert. You should probably die immediately be
 
 sub insert {
 	my ( $self, $item ) = validate_pos( @_, 1, 1 );
+	
+	return $self->_insertItem($item);
+
+}
+
+# =head2 removeRowForID
+# 
+# Remove an item with id or somethin
+# 
+# =cut
+# 
+# sub removeRowForID {
+# 	my ( $self, $id ) = validate_pos( @_, 1, 1 );
+# 
+# 	if ( $id !~ /^[0-9]+$/ || $id < 1 ) {
+# 		return 0;
+# 	}
+# 
+# 	# fill in table name
+# 	my $sql = "delete from <> where <>=" . $self->{db}->quote(<>);
+# 	return $self->{db}->do($sql);
+# }
+
+=head2 _insertItem
+
+Private method for insert. Used when a full item insert is needed.
+
+=cut
+
+sub _insertItem {
+	my ( $self, $item ) = validate_pos( @_, 1, 1 );
 
 	my $sql = "insert into song values ( NULL , "
 	  . join( ", ",
@@ -135,49 +166,7 @@ sub insert {
 	}
 
 	return $item->{ID};
-}
 
-# TODO this doesn't really make sense, I have two tables
-
-=head2 removeRowForID
-
-Remove an item with id or somethin
-
-=cut
-
-sub removeRowForID {
-	my ( $self, $id ) = validate_pos( @_, 1, 1 );
-
-	if ( $id !~ /^[0-9]+$/ || $id < 1 ) {
-		return 0;
-	}
-
-	# TODO fill in table name
-	my $sql = "delete from <> where <>=" . $self->{db}->quote(<>);
-	return $self->{db}->do($sql);
-}
-
-=head2 thingy
-
-do stuff to things
-
-=cut
-
-sub thingy {
-	my ( $self, $id ) = validate_pos( @_, 1, 1 );
-
-	if ( $id !~ /^[0-9]+$/ || $id < 1 ) {
-		return 0;
-	}
-
-	# TODO fill in table names, params to quote()
-	my $sql =
-	    "update <> set <>="
-	  . $self->{db}->quote(<>)
-	  . " where <>="
-	  . $self->{db}->quote(<>);
-
-	return $self->{db}->do($sql);
 }
 
 1;
