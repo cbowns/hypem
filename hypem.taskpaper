@@ -1,8 +1,32 @@
 todo:
 - clean up Database.pm
-- test the rest of DB.pm
+- unit test DB.pm
 - start using the DB
 	parse the twitter feed:
 	- pull down one page of HTML
 	- start hacking at the page structure
 	- class out the parser so it's easy to swap out when they break the page structure.
+idea:
+	required:
+	pull down the popular and twitter feeds, and dump the URLs into a database, indexed by name.
+	
+	optional:
+	store the popular count (?)
+	store the source of the song
+	persist across weeks and only show me new new songs.
+	
+	tech for 1.0:
+	
+	- persistent DB
+		- main table:
+			- id
+			- name column
+			- date added to db
+		- URL table
+			- id
+			- URL
+			- main id it relates to
+	later:
+	- tweet/popular counts?
+		- can store on a per-URL basis
+	
