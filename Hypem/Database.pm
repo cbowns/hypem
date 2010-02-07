@@ -97,8 +97,6 @@ sub close {
 	return undef;
 }
 
-# TODO write unit test.
-
 =head2 insert
 
 Inserts an item into the DB.
@@ -112,28 +110,13 @@ Returns -1 on failure from either insert. You should probably die immediately be
 
 sub insert {
 	my ( $self, $item ) = validate_pos( @_, 1, 1 );
-	
+
+	# if this item's name isn't already in the db:
 	return $self->_insertItem($item);
 
-}
+	# else, insert just the URL with the existing name's ID related to it.
 
-# =head2 removeRowForID
-# 
-# Remove an item with id or somethin
-# 
-# =cut
-# 
-# sub removeRowForID {
-# 	my ( $self, $id ) = validate_pos( @_, 1, 1 );
-# 
-# 	if ( $id !~ /^[0-9]+$/ || $id < 1 ) {
-# 		return 0;
-# 	}
-# 
-# 	# fill in table name
-# 	my $sql = "delete from <> where <>=" . $self->{db}->quote(<>);
-# 	return $self->{db}->do($sql);
-# }
+}
 
 =head2 _insertItem
 
@@ -144,10 +127,9 @@ Private method for insert. Used when a full item insert is needed.
 sub _insertItem {
 	my ( $self, $item ) = validate_pos( @_, 1, 1 );
 
-	my $sql = "insert into song values ( NULL , "
-	  . join( ", ",
-		map { $self->{db}->quote($_) }
-		  ( $item->{'name'}, time ) )
+	my $sql =
+	    "insert into song values ( NULL , "
+	  . join( ", ", map { $self->{db}->quote($_) } ( $item->{'name'}, time ) )
 	  . ")";
 
 	if ( !$self->{db}->do($sql) ) {

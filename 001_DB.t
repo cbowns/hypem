@@ -5,7 +5,7 @@ use warnings;
 use Log::Log4perl(":easy");
 
 use Test::More;
-plan tests => 4;
+plan tests => 5;
 
 # let us look up our plib path and whatnot.
 use File::Basename;
@@ -52,11 +52,12 @@ sub createTable {
 }
 
 sub insertItems {
-	my $item = {};
-	$item->{name} = 'Test Song';
-	$item->{url}  = 'http://cbowns.com/testsong';
+	my $item = { name => 'Test Song', url => 'http://cbowns.com/testsong' };
 	ok( $db->insert($item) > 0, "inserted an item" );
+	my $itemTwo = { name => 'Test Song', url => 'http://cbowns.com/testsong2' };
+	ok( $db->insert($itemTwo) > 0, "inserted a second item" );
 }
 
 # is( $returnID, 1, "first inserted row has ID 1" );
 # isnt( $wr1->ID(), defined $wr1->ID(), "and the row has no ID defined yet" );
+
