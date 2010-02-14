@@ -219,13 +219,25 @@ sub IDForName {
 
 =head2 URLsForID
 
-Get an array of URLs for an ID
+Get an array of URLs for a song ID
+
+	my @urlArray = URLsForID(song->{ID});
 
 =cut
 
 sub URLsForID {
 	my ( $self, $id ) = validate_pos( @_, 1, 1 );
 
+	my $sql = "select url from url where songID = ?";
+
+	my $preparedStatment = $self->{db}->prepare($sql);
+	$preparedStatment->execute($id);
+
+	my @rowArray;
+	while ( my $hashRef = $preparedStatment->fetchrow_hashref() ) {
+		push(@rowArray, $hashRef->{url});
+	}
+	return @rowArray;
 }
 
 1;
