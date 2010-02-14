@@ -111,10 +111,18 @@ Returns -1 on failure from either insert. You should probably die immediately be
 sub insert {
 	my ( $self, $item ) = validate_pos( @_, 1, 1 );
 
-	# if this item's name isn't already in the db:
-	return $self->_insertItem($item);
+	# see if the item's name is already in the DB.
+	$item->{ID} = $self->IDForName( $item->{name} );
+	if ( $item->{ID} ) {
 
-	# else, insert just the URL with the existing name's ID related to it.
+		# TODO see if the URL already exists too!
+		return $self->_addURLForItem($item);
+	}
+	else {
+
+		# if no:
+		return $self->_insertItem($item);
+	}
 
 }
 
@@ -150,6 +158,27 @@ sub _insertItem {
 	return $item->{ID};
 }
 
+=head2 _addURLForItem
+
+Private method for insert. Used when only a URL insert is needed.
+
+=cut
+
+sub _addURLForItem {
+	my ( $self, $item ) = validate_pos( @_, 1, 1 );
+
+	my $sql = "insert into url values ( NULL , "
+	  . join( ", ",
+		map { $self->{db}->quote($_) } ( $item->{'url'}, $item->{'ID'} ) )
+	  . ")";
+
+	if ( !$self->{db}->do($sql) ) {
+		return -1;
+	}
+
+	return $item->{ID};
+}
+
 =head2 numberOfItems
 
 Get the number of items in the DB.
@@ -162,6 +191,30 @@ sub numberOfItems {
 	my $sql = "select count(id) from song";
 
 	return @{ $self->{db}->selectcol_arrayref($sql) }[0];
+}
+
+=head2 IDForName
+
+Returns the ID for an entry with this name.
+
+	if (IDForName("string") > 0) {
+		# we have it in the DB already
+	}
+
+=cut
+
+sub IDForName {
+	my ( $self, $name ) = validate_pos( @_, 1, 1 );
+
+	my $sql = "select ID from song where name = ?";
+
+	my $preparedStatment = $self->{db}->prepare($sql);
+	$preparedStatment->execute($name);
+
+	if ( my $hashRef = $preparedStatment->fetchrow_hashref() ) {
+		return $hashRef->{ID};
+	}
+	return undef;
 }
 
 =head2 URLsForID
