@@ -100,18 +100,21 @@ foreach my $number (@count) {
 	# get a list of items
 	my $items = treeToArray( $findRoot, 'item' );
 	foreach my $item ( @{$items} ) {
-
+		my $row = {};
 		my $name = findUntil( $item, 'title' );
 		$name = $name->[2];
-		$name = trim($name);
+		$row->{name} = trim($name);
 
 		my $url = findUntil( $item, 'link' );
 		$url = findUntil( $url, 'http://hypem.com', 1 );
+		$row->{url} = $url;
 
 		my $date = findUntil( $item, 'pubDate' );
 		$date = $date->[2];
+		$row->{'date added'} = $date;
 
 		$logger->debug("Currently: name: $name, URL: $url date: $date");
+		$db->insert($row);
 	}
 }
 
