@@ -1,11 +1,14 @@
 todo:
-- clean up Database.pm
-- unit test DB.pm
-- start using the DB
+- clean up Database.pm @done(2010-02-21)
+- unit test DB.pm @done(2010-02-21)
+- start using the DB @done(2010-02-21)
 	parse the twitter feed:
 	- pull down one page of HTML
 	- start hacking at the page structure
 	- class out the parser so it's easy to swap out when they break the page structure.
+	other ideas:
+	- add a date of insertion for each item
+	- add its rank on the page? we know which page it was from.
 idea:
 	required:
 	pull down the popular and twitter feeds, and dump the URLs into a database, indexed by name.
