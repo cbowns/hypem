@@ -50,7 +50,8 @@ my %good = map { $_ => 1 } ( 9, 10, 13, 32 .. 127 );
 # = pull down the popular feed =
 # ==============================
 
-my @count = ( 1 .. 5 );
+# my @count = ( 1 .. 5 );
+my $count = 0
 foreach my $number (@count) {
 	my $popularFile = "feed.popular.$number.xml";
 
@@ -113,14 +114,82 @@ foreach my $number (@count) {
 		$date = $date->[2];
 		$row->{'date added'} = $date;
 
-		$logger->debug("Currently: name: $name, URL: $url date: $date");
 		$db->insert($row);
+		$logger->debug("Just inserted $row->{ID}");
 	}
 }
 
-# twitter will be harder.
-# curl -A "Mozilla/4.0 (compatible; MSIE 5.01; Windows NT 5.0)"
-# I want: http://hypem.com/twitter/popular/lastweek/1/ THROUGH http://hypem.com/#/twitter/popular/lastweek/5/
+# ===========
+# = twitter =
+# ===========
+
+my @count = ( 1 .. 5 );
+foreach my $number (@count) {
+	my $twitterFile = "feed.twitter.$number.xml";
+
+	# feeds are 1-5:
+	my $twitterUrl = "http://hypem.com/twitter/popular/lastweek/$number/";
+
+	if ( !-e $twitterFile ) {
+		$logger->debug("curling the url: $twitterUrl");
+`curl -A "Mozilla/4.0 (compatible; MSIE 5.01; Windows NT 5.0)" $twitterUrl -o $twitterFile`;
+
+		# slurp up the file
+		open FILE, "$twitterFile";
+		my @lines = <FILE>;
+		close FILE;
+
+		# pull out non-ascii chars
+		open FILE, ">$twitterFile" or die $!;
+		foreach my $line (@lines) {
+			$line =~ s/(.)/$good{ord($1)} ? $1 : ' '/eg;
+
+			# and shove them back into the file.
+			print FILE $line;
+		}
+		close FILE;
+
+	}
+	else {
+		$logger->debug(
+			"file $twitterFile already exists, using filesystem cache");
+	}
+
+	# ==========================
+	# = parse the popular feed =
+	# ==========================
+
+	# parse out the tree
+	my $p1 = new XML::Parser( Style => 'Tree' );
+	my $popularTree = $p1->parsefile($twitterFile);
+
+	# recurse down a bit to find the channel subtree:
+	my @search = ( 'rss', 'channel' );
+	my $findRoot = $popularTree;
+	foreach my $currentSearch (@search) {
+		$findRoot = findUntil( $findRoot, $currentSearch );
+	}
+
+	# get a list of items
+	my $items = treeToArray( $findRoot, 'item' );
+	foreach my $item ( @{$items} ) {
+		my $row = {};
+		my $name = findUntil( $item, 'title' );
+		$name = $name->[2];
+		$row->{name} = trim($name);
+
+		my $url = findUntil( $item, 'link' );
+		$url = findUntil( $url, 'http://hypem.com', 1 );
+		$row->{url} = $url;
+
+		my $date = findUntil( $item, 'pubDate' );
+		$date = $date->[2];
+		$row->{'date added'} = $date;
+
+		$db->insert($row);
+		$logger->debug("Just inserted $row->{ID}");
+	}
+}
 
 =head2 findUntil
 
