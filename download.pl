@@ -133,7 +133,7 @@ foreach my $number (@count) {
 
 	if ( !-e $twitterFile ) {
 		$logger->debug("curling the url: $twitterUrl");
-`curl -A "Mozilla/4.0 (compatible; MSIE 5.01; Windows NT 5.0)" $twitterUrl -o $twitterFile`;
+`curl -A "Mozilla/5.0 (Macintosh; U; Intel Mac OS X 10_6_4; en-us) AppleWebKit/533.8 (KHTML, like Gecko) Version/4.1 Safari/533.8" $twitterUrl -o $twitterFile`;
 
 		# slurp up the file
 		open FILE, "$twitterFile";
