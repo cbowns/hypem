@@ -49,73 +49,74 @@ my %good = map { $_ => 1 } ( 9, 10, 13, 32 .. 127 );
 # ==============================
 # = pull down the popular feed =
 # ==============================
+if (0) {
+	my @count = ( 1 .. 5 );
+	foreach my $number (@count) {
+		my $popularFile = "feed.popular.$number.xml";
 
-# my @count = ( 1 .. 5 );
-my $count = 0
-foreach my $number (@count) {
-	my $popularFile = "feed.popular.$number.xml";
+		# feeds are 1-5:
+		my $popularUrl =
+		  "http://hypem.com/feed/popular/lastweek/$number/feed.xml";
 
-	# feeds are 1-5:
-	my $popularUrl = "http://hypem.com/feed/popular/lastweek/$number/feed.xml";
-
-	if ( !-e $popularFile ) {
-		$logger->debug("curling the url: $popularUrl");
+		if ( !-e $popularFile ) {
+			$logger->debug("curling the url: $popularUrl");
 `curl -A "Mozilla/4.0 (compatible; MSIE 5.01; Windows NT 5.0)" $popularUrl -o $popularFile`;
 
-		# slurp up the file
-		open FILE, "$popularFile";
-		my @lines = <FILE>;
-		close FILE;
+			# slurp up the file
+			open FILE, "$popularFile";
+			my @lines = <FILE>;
+			close FILE;
 
-		# pull out non-ascii chars
-		open FILE, ">$popularFile" or die $!;
-		foreach my $line (@lines) {
-			$line =~ s/(.)/$good{ord($1)} ? $1 : ' '/eg;
+			# pull out non-ascii chars
+			open FILE, ">$popularFile" or die $!;
+			foreach my $line (@lines) {
+				$line =~ s/(.)/$good{ord($1)} ? $1 : ' '/eg;
 
-			# and shove them back into the file.
-			print FILE $line;
+				# and shove them back into the file.
+				print FILE $line;
+			}
+			close FILE;
+
 		}
-		close FILE;
+		else {
+			$logger->debug(
+				"file $popularFile already exists, using filesystem cache");
+		}
 
-	}
-	else {
-		$logger->debug(
-			"file $popularFile already exists, using filesystem cache");
-	}
+		# ==========================
+		# = parse the popular feed =
+		# ==========================
 
-	# ==========================
-	# = parse the popular feed =
-	# ==========================
+		# parse out the tree
+		my $p1 = new XML::Parser( Style => 'Tree' );
+		my $popularTree = $p1->parsefile($popularFile);
 
-	# parse out the tree
-	my $p1 = new XML::Parser( Style => 'Tree' );
-	my $popularTree = $p1->parsefile($popularFile);
+		# recurse down a bit to find the channel subtree:
+		my @search = ( 'rss', 'channel' );
+		my $findRoot = $popularTree;
+		foreach my $currentSearch (@search) {
+			$findRoot = findUntil( $findRoot, $currentSearch );
+		}
 
-	# recurse down a bit to find the channel subtree:
-	my @search = ( 'rss', 'channel' );
-	my $findRoot = $popularTree;
-	foreach my $currentSearch (@search) {
-		$findRoot = findUntil( $findRoot, $currentSearch );
-	}
+		# get a list of items
+		my $items = treeToArray( $findRoot, 'item' );
+		foreach my $item ( @{$items} ) {
+			my $row = {};
+			my $name = findUntil( $item, 'title' );
+			$name = $name->[2];
+			$row->{name} = trim($name);
 
-	# get a list of items
-	my $items = treeToArray( $findRoot, 'item' );
-	foreach my $item ( @{$items} ) {
-		my $row = {};
-		my $name = findUntil( $item, 'title' );
-		$name = $name->[2];
-		$row->{name} = trim($name);
+			my $url = findUntil( $item, 'link' );
+			$url = findUntil( $url, 'http://hypem.com', 1 );
+			$row->{url} = $url;
 
-		my $url = findUntil( $item, 'link' );
-		$url = findUntil( $url, 'http://hypem.com', 1 );
-		$row->{url} = $url;
+			my $date = findUntil( $item, 'pubDate' );
+			$date = $date->[2];
+			$row->{'date added'} = $date;
 
-		my $date = findUntil( $item, 'pubDate' );
-		$date = $date->[2];
-		$row->{'date added'} = $date;
-
-		$db->insert($row);
-		$logger->debug("Just inserted $row->{ID}");
+			$db->insert($row);
+			$logger->debug("Just inserted $row->{ID}");
+		}
 	}
 }
 
@@ -125,7 +126,7 @@ foreach my $number (@count) {
 
 my @count = ( 1 .. 5 );
 foreach my $number (@count) {
-	my $twitterFile = "feed.twitter.$number.xml";
+	my $twitterFile = "feed.twitter.$number.html";
 
 	# feeds are 1-5:
 	my $twitterUrl = "http://hypem.com/twitter/popular/lastweek/$number/";
@@ -149,6 +150,41 @@ foreach my $number (@count) {
 		}
 		close FILE;
 
+		# pull out javascript snippets
+		open FILE, ">$twitterFile" or die $!;
+		my $jsFlag = 0;
+		foreach my $line (@lines) {
+			$jsFlag = 1 if ( $line =~ m/<script type="text\/javascript">/ );
+			$jsFlag = 0 if ( $line =~ m/<\/script>/ );
+
+			# $logger->debug($line);
+			# $logger->debug("jsFlag: $jsFlag");
+
+			# and shove them back into the file.
+			print FILE $line if ($jsFlag);
+		}
+		close FILE;
+		
+		# Don't ask.
+		my $jsonRegex = '\W+<script type="text/javascript">\W+trackList\[document\.location\.href\]\.push\(\{((.|\n)*)\}\);';
+		
+		# trackList[document.location.href].push({
+		# 			type:'normal',
+		# 			id:'1036102',
+		# 			postid:'1073828',
+		# 			time:'190',
+		# 			ts: '1265848553',
+		# 			fav:'0',
+		# 			key: '4c5079a33013ce653d6100a40447423a',
+		# 			imeem_id:'',
+		# 			artist:'Light Alive',
+		# 			song:'Trust Revenge',
+		# 			amazon:'',
+		# 			itunes:'',
+		# 			emusic:'',
+		# 			exact_track_avail:'0'
+		#         });
+		
 	}
 	else {
 		$logger->debug(
@@ -156,16 +192,16 @@ foreach my $number (@count) {
 	}
 
 	# ==========================
-	# = parse the popular feed =
+	# = parse the twitter html =
 	# ==========================
 
 	# parse out the tree
 	my $p1 = new XML::Parser( Style => 'Tree' );
-	my $popularTree = $p1->parsefile($twitterFile);
+	my $twitterTree = $p1->parsefile($twitterFile);
 
 	# recurse down a bit to find the channel subtree:
 	my @search = ( 'rss', 'channel' );
-	my $findRoot = $popularTree;
+	my $findRoot = $twitterTree;
 	foreach my $currentSearch (@search) {
 		$findRoot = findUntil( $findRoot, $currentSearch );
 	}
