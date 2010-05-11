@@ -164,7 +164,30 @@ foreach my $number (@count) {
 			print FILE $line if ($jsFlag);
 		}
 		close FILE;
-		
+	}
+	else {
+		$logger->debug(
+			"file $twitterFile already exists, using filesystem cache");
+		# slurp up the file
+		open FILE, "$twitterFile";
+		my @lines = <FILE>;
+		close FILE;
+			
+		open FILE, ">$twitterFile" or die $!;
+		my $keepFlag = 0;
+		foreach my $line (@lines) {
+			$keepFlag = 1 if ($leadingKeepFlag);
+			$leadingKeepFlag = 1 if ( $line =~ m/trackList\[document\.location\.href\]\.push\(/ );
+			($keepFlag = $leadingKeepFlag) = 0 if ( $line =~ m/}\);/ );
+
+			$logger->debug($line);
+			$logger->debug("keepFlag: $keepFlag");
+
+			# and shove them back into the file.
+			print FILE $line if ($keepFlag);
+		}
+		close FILE;
+	
 		# Don't ask.
 		my $jsonRegex = '\W+<script type="text/javascript">\W+trackList\[document\.location\.href\]\.push\(\{((.|\n)*)\}\);';
 		
@@ -185,10 +208,6 @@ foreach my $number (@count) {
 		# 			exact_track_avail:'0'
 		#         });
 		
-	}
-	else {
-		$logger->debug(
-			"file $twitterFile already exists, using filesystem cache");
 	}
 
 	# ==========================
