@@ -239,7 +239,7 @@ foreach my $number (@count) {
 			$row->{'date added'} = $time;
 
 			$db->insert($row);
-			$logger->debug("Just inserted $row->{ID}");
+			$logger->debug("Just inserted $row->{ID} for artist [$artist], song [$song], url [$row->{url}]");
 
 			undef ($id); undef ($time); undef ($song); undef ($artist);
 		}
