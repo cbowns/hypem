@@ -213,9 +213,9 @@ foreach my $number (@count) {
 				}
 				if ($id and $time and $artist and $song) {
 					my $row = {};
-					$row->{name} = trim($artist . " - " . $song);
+					$row->{name} = trim("$artist - $song");
 
-					$row->{url} = "http://hypem.com/track/" . $id;
+					$row->{url} = "http://hypem.com/track/$id";
 
 					$row->{'date added'} = $time;
 
