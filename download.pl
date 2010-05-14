@@ -164,6 +164,8 @@ foreach my $number (@count) {
 
 		open FILE, ">$twitterFile" or die $!;
 		my $keepFlag = my $leadingKeepFlag = 0;
+		my ($id, $artist, $song, $time);
+		my $completeRecord = 0;
 		foreach my $line (@lines) {
 			$keepFlag = 1 if ($leadingKeepFlag);
 			# pull out a subset of the JS and put it back into the file.
@@ -173,8 +175,59 @@ foreach my $number (@count) {
 				$keepFlag = $leadingKeepFlag = 0;
 			}
 
-			# and shove them back into the file.
-			print FILE $line if ($keepFlag);
+			# ==========================
+			# = parse the twitter html =
+			# ==========================
+			# JS record format:
+			# 			type:'normal',
+			# 			id:'1036102',
+			# 			postid:'1073828',
+			# 			time:'190',
+			# 			ts: '1265848553',
+			# 			fav:'0',
+			# 			key: '4c5079a33013ce653d6100a40447423a',
+			# 			imeem_id:'',
+			# 			artist:'Light Alive',
+			# 			song:'Trust Revenge',
+			# 			amazon:'',
+			# 			itunes:'',
+			# 			emusic:'',
+			# 			exact_track_avail:'0'
+			#
+	
+			# ^ that's a newline. ^
+				
+			if ($keepFlag) {
+				print FILE $line;
+
+				if ($line =~ /\W*id:\W*'(.*)'/ ) {
+					$id = $1;
+				}
+				if ($line =~ /\W*ts:\W*'(.*)'/ ) {
+					$time = $1;
+				}
+				if ($line =~ /\W*song:\W*'(.*)'/ ) {
+					$song = $1;
+				}
+				if ($line =~ /\W*artist:\W*'(.*)'/ ) {
+					$artist = $1;
+					$completeRecord = 1;
+				}
+				if ($completeRecord) {
+					my $row = {};
+					$row->{name} = trim($artist . " - " . $song);
+
+					$row->{url} = "http://hypem.com/track/" . $id;
+
+					$row->{'date added'} = $time;
+
+					$db->insert($row);
+					$logger->debug("Just inserted $row->{ID}");
+
+					$completeRecord = 0;
+					undef ($id); undef ($time); undef ($song); undef ($artist);
+				}
+			}
 		}
 		close FILE;
 	}
@@ -187,28 +240,6 @@ foreach my $number (@count) {
 		close FILE;
 			
 	}
-
-	# ==========================
-	# = parse the twitter html =
-	# ==========================
-	# JS record format:
-	# 			type:'normal',
-	# 			id:'1036102',
-	# 			postid:'1073828',
-	# 			time:'190',
-	# 			ts: '1265848553',
-	# 			fav:'0',
-	# 			key: '4c5079a33013ce653d6100a40447423a',
-	# 			imeem_id:'',
-	# 			artist:'Light Alive',
-	# 			song:'Trust Revenge',
-	# 			amazon:'',
-	# 			itunes:'',
-	# 			emusic:'',
-	# 			exact_track_avail:'0'
-	#
-	
-	# ^ that's a newline. ^
 }
 
 =head2 findUntil
