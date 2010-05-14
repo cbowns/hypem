@@ -165,15 +165,6 @@ foreach my $number (@count) {
 		}
 		close FILE;
 
-	}
-	else {
-		$logger->debug(
-			"file $twitterFile already exists, using filesystem cache");
-		# slurp up the file
-		open FILE, "$twitterFile";
-		my @lines = <FILE>;
-		close FILE;
-			
 		open FILE, ">$twitterFile" or die $!;
 		my $keepFlag = my $leadingKeepFlag = 0;
 		foreach my $line (@lines) {
@@ -188,7 +179,15 @@ foreach my $number (@count) {
 			print FILE $line if ($keepFlag);
 		}
 		close FILE;
-
+	}
+	else {
+		$logger->debug(
+			"file $twitterFile already exists, using filesystem cache");
+		# slurp up the file
+		open FILE, "$twitterFile";
+		my @lines = <FILE>;
+		close FILE;
+			
 		# Don't ask.
 		my $jsonRegex = '\W+<script type="text/javascript">\W+trackList\[document\.location\.href\]\.push\(\{((.|\n)*)\}\);';
 		
