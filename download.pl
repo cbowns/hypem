@@ -49,8 +49,9 @@ my %good = map { $_ => 1 } ( 9, 10, 13, 32 .. 127 );
 # ==============================
 # = pull down the popular feed =
 # ==============================
-# if (1) {
-	my @count = ( 1 .. 5 );
+my @count;
+# if (0) {
+	@count = ( 1 .. 5 );
 	foreach my $number (@count) {
 		my $popularFile = "feed.popular.$number.xml";
 
@@ -213,7 +214,10 @@ foreach my $number (@count) {
 				}
 				if ($id and $time and $artist and $song) {
 					my $row = {};
+
+					# strip backslashes out. Silly Javascript.
 					$song =~ s/\\//g;
+
 					$row->{name} = trim("$artist - $song");
 
 					$row->{url} = "http://hypem.com/track/$id";
