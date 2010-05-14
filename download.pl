@@ -165,7 +165,6 @@ foreach my $number (@count) {
 		open FILE, ">$twitterFile" or die $!;
 		my $keepFlag = my $leadingKeepFlag = 0;
 		my ($id, $artist, $song, $time);
-		my $completeRecord = 0;
 		foreach my $line (@lines) {
 			$keepFlag = 1 if ($leadingKeepFlag);
 			# pull out a subset of the JS and put it back into the file.
@@ -206,14 +205,13 @@ foreach my $number (@count) {
 				if ($line =~ /\W*ts:\W*'(.*)'/ ) {
 					$time = $1;
 				}
+				if ($line =~ /\W*artist:\W*'(.*)'/ ) {
+					$artist = $1;
+				}
 				if ($line =~ /\W*song:\W*'(.*)'/ ) {
 					$song = $1;
 				}
-				if ($line =~ /\W*artist:\W*'(.*)'/ ) {
-					$artist = $1;
-					$completeRecord = 1;
-				}
-				if ($completeRecord) {
+				if ($id and $time and $artist and $song) {
 					my $row = {};
 					$row->{name} = trim($artist . " - " . $song);
 
@@ -224,7 +222,6 @@ foreach my $number (@count) {
 					$db->insert($row);
 					$logger->debug("Just inserted $row->{ID}");
 
-					$completeRecord = 0;
 					undef ($id); undef ($time); undef ($song); undef ($artist);
 				}
 			}
