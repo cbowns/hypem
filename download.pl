@@ -213,6 +213,7 @@ foreach my $number (@count) {
 				}
 				if ($id and $time and $artist and $song) {
 					my $row = {};
+					$song =~ s/\\//g;
 					$row->{name} = trim("$artist - $song");
 
 					$row->{url} = "http://hypem.com/track/$id";
