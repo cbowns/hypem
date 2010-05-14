@@ -186,62 +186,29 @@ foreach my $number (@count) {
 		my @lines = <FILE>;
 		close FILE;
 			
-		# Don't ask.
-		my $jsonRegex = '\W+<script type="text/javascript">\W+trackList\[document\.location\.href\]\.push\(\{((.|\n)*)\}\);';
-		
-		# trackList[document.location.href].push({
-		# 			type:'normal',
-		# 			id:'1036102',
-		# 			postid:'1073828',
-		# 			time:'190',
-		# 			ts: '1265848553',
-		# 			fav:'0',
-		# 			key: '4c5079a33013ce653d6100a40447423a',
-		# 			imeem_id:'',
-		# 			artist:'Light Alive',
-		# 			song:'Trust Revenge',
-		# 			amazon:'',
-		# 			itunes:'',
-		# 			emusic:'',
-		# 			exact_track_avail:'0'
-		#         });
-		
 	}
 
 	# ==========================
 	# = parse the twitter html =
 	# ==========================
-
-	# parse out the tree
-	my $p1 = new XML::Parser( Style => 'Tree' );
-	my $twitterTree = $p1->parsefile($twitterFile);
-
-	# recurse down a bit to find the channel subtree:
-	my @search = ( 'rss', 'channel' );
-	my $findRoot = $twitterTree;
-	foreach my $currentSearch (@search) {
-		$findRoot = findUntil( $findRoot, $currentSearch );
-	}
-
-	# get a list of items
-	my $items = treeToArray( $findRoot, 'item' );
-	foreach my $item ( @{$items} ) {
-		my $row = {};
-		my $name = findUntil( $item, 'title' );
-		$name = $name->[2];
-		$row->{name} = trim($name);
-
-		my $url = findUntil( $item, 'link' );
-		$url = findUntil( $url, 'http://hypem.com', 1 );
-		$row->{url} = $url;
-
-		my $date = findUntil( $item, 'pubDate' );
-		$date = $date->[2];
-		$row->{'date added'} = $date;
-
-		$db->insert($row);
-		$logger->debug("Just inserted $row->{ID}");
-	}
+	# JS record format:
+	# 			type:'normal',
+	# 			id:'1036102',
+	# 			postid:'1073828',
+	# 			time:'190',
+	# 			ts: '1265848553',
+	# 			fav:'0',
+	# 			key: '4c5079a33013ce653d6100a40447423a',
+	# 			imeem_id:'',
+	# 			artist:'Light Alive',
+	# 			song:'Trust Revenge',
+	# 			amazon:'',
+	# 			itunes:'',
+	# 			emusic:'',
+	# 			exact_track_avail:'0'
+	#
+	
+	# ^ that's a newline. ^
 }
 
 =head2 findUntil
