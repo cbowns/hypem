@@ -148,7 +148,7 @@ sub _insertItem {
 
 	$sql = "insert into url values ( NULL , "
 	  . join( ", ",
-		map { $self->{db}->quote($_) } ( $item->{'url'}, $item->{'ID'} ) )
+		map { $self->{db}->quote($_) } ( $item->{'url'}, $item->{ID} ) )
 	  . ")";
 
 	if ( !$self->{db}->do($sql) ) {

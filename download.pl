@@ -229,10 +229,10 @@ foreach my $number (@count) {
 		if ($id and $time and $artist and $song) {
 			my $row = {};
 
-			# strip backslashes out. Silly Javascript.
-			$song =~ s/\\//g;
-
 			$row->{name} = trim("$artist - $song");
+
+			# strip backslashes out. Silly Javascript.
+			$row->{name} =~ s/\\//g;
 
 			$row->{url} = "http://hypem.com/track/$id";
 
