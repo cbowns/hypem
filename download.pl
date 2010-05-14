@@ -169,8 +169,8 @@ foreach my $number (@count) {
 			# pull out a subset of the JS and put it back into the file.
 			$leadingKeepFlag = 1 if ( $line =~ m/trackList\[document\.location\.href\]\.push\(/ );
 			if ( $line =~ m/}\);/ ) {
+				print FILE "\n" if ($keepFlag == 1); # only print this at the end of our records.
 				$keepFlag = $leadingKeepFlag = 0;
-				print FILE "\n";
 			}
 
 			# and shove them back into the file.
