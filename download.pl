@@ -132,13 +132,14 @@ foreach my $number (@count) {
 	# feeds are 1-5:
 	my $twitterUrl = "http://hypem.com/twitter/popular/lastweek/$number/";
 
+	my @lines;
 	if ( !-e $twitterFile ) {
 		$logger->debug("curling the url: $twitterUrl");
 `curl -A "Mozilla/5.0 (Macintosh; U; Intel Mac OS X 10_6_4; en-us) AppleWebKit/533.8 (KHTML, like Gecko) Version/4.1 Safari/533.8" $twitterUrl -o $twitterFile`;
 
 		# slurp up the file
 		open FILE, "$twitterFile";
-		my @lines = <FILE>;
+		@lines = <FILE>;
 		close FILE;
 
 		# pull out non-ascii chars
@@ -165,7 +166,6 @@ foreach my $number (@count) {
 
 		open FILE, ">$twitterFile" or die $!;
 		my $keepFlag = my $leadingKeepFlag = 0;
-		my ($id, $artist, $song, $time);
 		foreach my $line (@lines) {
 			$keepFlag = 1 if ($leadingKeepFlag);
 			# pull out a subset of the JS and put it back into the file.
@@ -175,62 +175,11 @@ foreach my $number (@count) {
 				$keepFlag = $leadingKeepFlag = 0;
 			}
 
-			# ==========================
-			# = parse the twitter html =
-			# ==========================
-			# JS record format:
-			# 			type:'normal',
-			# 			id:'1036102',
-			# 			postid:'1073828',
-			# 			time:'190',
-			# 			ts: '1265848553',
-			# 			fav:'0',
-			# 			key: '4c5079a33013ce653d6100a40447423a',
-			# 			imeem_id:'',
-			# 			artist:'Light Alive',
-			# 			song:'Trust Revenge',
-			# 			amazon:'',
-			# 			itunes:'',
-			# 			emusic:'',
-			# 			exact_track_avail:'0'
-			#
-	
-			# ^ that's a newline. ^
-				
-			if ($keepFlag) {
-				print FILE $line;
-
-				if ($line =~ /\W*id:\W*'(.*)'/ ) {
-					$id = $1;
-				}
-				if ($line =~ /\W*ts:\W*'(.*)'/ ) {
-					$time = $1;
-				}
-				if ($line =~ /\W*artist:\W*'(.*)'/ ) {
-					$artist = $1;
-				}
-				if ($line =~ /\W*song:\W*'(.*)'/ ) {
-					$song = $1;
-				}
-				if ($id and $time and $artist and $song) {
-					my $row = {};
-
-					# strip backslashes out. Silly Javascript.
-					$song =~ s/\\//g;
-
-					$row->{name} = trim("$artist - $song");
-
-					$row->{url} = "http://hypem.com/track/$id";
-
-					$row->{'date added'} = $time;
-
-					$db->insert($row);
-					$logger->debug("Just inserted $row->{ID}");
-
-					undef ($id); undef ($time); undef ($song); undef ($artist);
-				}
-			}
+			print FILE $line if ($keepFlag);
 		}
+		close FILE;
+		open FILE, "$twitterFile";
+		@lines = <FILE>;
 		close FILE;
 	}
 	else {
@@ -238,9 +187,62 @@ foreach my $number (@count) {
 			"file $twitterFile already exists, using filesystem cache");
 		# slurp up the file
 		open FILE, "$twitterFile";
-		my @lines = <FILE>;
+		@lines = <FILE>;
 		close FILE;
-			
+	}
+		# ==========================
+		# = parse the twitter html =
+		# ==========================
+		# JS record format:
+		# 			type:'normal',
+		# 			id:'1036102',
+		# 			postid:'1073828',
+		# 			time:'190',
+		# 			ts: '1265848553',
+		# 			fav:'0',
+		# 			key: '4c5079a33013ce653d6100a40447423a',
+		# 			imeem_id:'',
+		# 			artist:'Light Alive',
+		# 			song:'Trust Revenge',
+		# 			amazon:'',
+		# 			itunes:'',
+		# 			emusic:'',
+		# 			exact_track_avail:'0'
+		#
+
+		# ^ that's a newline. ^
+
+	my ($id, $artist, $song, $time);
+	foreach my $line (@lines) {
+		if ($line =~ /\W*id:\W*'(.*)'/ ) {
+			$id = $1;
+		}
+		if ($line =~ /\W*ts:\W*'(.*)'/ ) {
+			$time = $1;
+		}
+		if ($line =~ /\W*artist:\W*'(.*)'/ ) {
+			$artist = $1;
+		}
+		if ($line =~ /\W*song:\W*'(.*)'/ ) {
+			$song = $1;
+		}
+		if ($id and $time and $artist and $song) {
+			my $row = {};
+
+			# strip backslashes out. Silly Javascript.
+			$song =~ s/\\//g;
+
+			$row->{name} = trim("$artist - $song");
+
+			$row->{url} = "http://hypem.com/track/$id";
+
+			$row->{'date added'} = $time;
+
+			$db->insert($row);
+			$logger->debug("Just inserted $row->{ID}");
+
+			undef ($id); undef ($time); undef ($song); undef ($artist);
+		}
 	}
 }
 
