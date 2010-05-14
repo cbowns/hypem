@@ -157,9 +157,6 @@ foreach my $number (@count) {
 			$jsFlag = 1 if ( $line =~ m/<script type="text\/javascript">/ );
 			$jsFlag = 0 if ( $line =~ m/<\/script>/ );
 
-			# $logger->debug($line);
-			# $logger->debug("jsFlag: $jsFlag");
-
 			# and shove them back into the file.
 			print FILE $line if ($jsFlag);
 		}
@@ -169,11 +166,12 @@ foreach my $number (@count) {
 		my $keepFlag = my $leadingKeepFlag = 0;
 		foreach my $line (@lines) {
 			$keepFlag = 1 if ($leadingKeepFlag);
+			# pull out a subset of the JS and put it back into the file.
 			$leadingKeepFlag = 1 if ( $line =~ m/trackList\[document\.location\.href\]\.push\(/ );
-			$keepFlag = $leadingKeepFlag = 0 if ( $line =~ m/}\);/ );
-
-			# $logger->debug($line);
-			# $logger->debug("keepFlag: $keepFlag; leadingKeepFlag: $leadingKeepFlag");
+			if ( $line =~ m/}\);/ ) {
+				$keepFlag = $leadingKeepFlag = 0;
+				print FILE "\n";
+			}
 
 			# and shove them back into the file.
 			print FILE $line if ($keepFlag);
