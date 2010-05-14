@@ -124,7 +124,7 @@ my %good = map { $_ => 1 } ( 9, 10, 13, 32 .. 127 );
 # = twitter =
 # ===========
 
-my @count = ( 1 .. 5 );
+@count = ( 1 .. 5 );
 foreach my $number (@count) {
 	my $twitterFile = "feed.twitter.$number.html";
 
