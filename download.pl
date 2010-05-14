@@ -49,7 +49,7 @@ my %good = map { $_ => 1 } ( 9, 10, 13, 32 .. 127 );
 # ==============================
 # = pull down the popular feed =
 # ==============================
-if (0) {
+# if (1) {
 	my @count = ( 1 .. 5 );
 	foreach my $number (@count) {
 		my $popularFile = "feed.popular.$number.xml";
@@ -118,7 +118,7 @@ if (0) {
 			$logger->debug("Just inserted $row->{ID}");
 		}
 	}
-}
+# }
 
 # ===========
 # = twitter =
