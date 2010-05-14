@@ -164,6 +164,7 @@ foreach my $number (@count) {
 			print FILE $line if ($jsFlag);
 		}
 		close FILE;
+
 	}
 	else {
 		$logger->debug(
@@ -174,20 +175,20 @@ foreach my $number (@count) {
 		close FILE;
 			
 		open FILE, ">$twitterFile" or die $!;
-		my $keepFlag = 0;
+		my $keepFlag = my $leadingKeepFlag = 0;
 		foreach my $line (@lines) {
 			$keepFlag = 1 if ($leadingKeepFlag);
 			$leadingKeepFlag = 1 if ( $line =~ m/trackList\[document\.location\.href\]\.push\(/ );
-			($keepFlag = $leadingKeepFlag) = 0 if ( $line =~ m/}\);/ );
+			$keepFlag = $leadingKeepFlag = 0 if ( $line =~ m/}\);/ );
 
-			$logger->debug($line);
-			$logger->debug("keepFlag: $keepFlag");
+			# $logger->debug($line);
+			# $logger->debug("keepFlag: $keepFlag; leadingKeepFlag: $leadingKeepFlag");
 
 			# and shove them back into the file.
 			print FILE $line if ($keepFlag);
 		}
 		close FILE;
-	
+
 		# Don't ask.
 		my $jsonRegex = '\W+<script type="text/javascript">\W+trackList\[document\.location\.href\]\.push\(\{((.|\n)*)\}\);';
 		
