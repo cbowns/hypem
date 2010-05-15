@@ -213,19 +213,29 @@ foreach my $number (@count) {
 		# ^ that's a newline. ^
 
 	my ($id, $artist, $song, $time);
+	# Read all lines until $line is just a newline.
+	# Then parse out id, ts, artist, song.
+	my $record;
 	foreach my $line (@lines) {
-		if ($line =~ /\W*id:\W*'(.*)'/ ) {
-			$id = $1;
+		chomp($line);
+		print "[$line]\n";
+		# run until we hit a newline; that's our record delimiter.
+		if ($line ne '' ) {
+			$record .= $line;
+			next;
 		}
-		if ($line =~ /\W*ts:\W*'(.*)'/ ) {
-			$time = $1;
-		}
-		if ($line =~ /\W*artist:\W*'(.*)'/ ) {
-			$artist = $1;
-		}
-		if ($line =~ /\W*song:\W*'(.*)'/ ) {
-			$song = $1;
-		}
+		
+		# now parse!
+		print "Got a full record! Parsing time.\n\n";
+		
+		# whatever I match here needs to slurp up newlines and/or convert them to plain ol' whitespace.
+		$line =~ /\W*id:\W*'(.*)'\W*ts:\W*'(.*)'\W*artist:\W*'(.*)'\W*song:\W*'(.*)'/;
+		
+		$id = $1;
+		$time = $2;
+		$artist = $3;
+		$song = $4;
+		
 		if ($id and $time and $artist and $song) {
 			my $row = {};
 
@@ -241,7 +251,10 @@ foreach my $number (@count) {
 			$db->insert($row);
 			$logger->debug("Just inserted $row->{ID} for artist [$artist], song [$song], url [$row->{url}]");
 
-			undef ($id); undef ($time); undef ($song); undef ($artist);
+			undef ($id); undef ($time); undef ($song); undef ($artist); undef ($record);
+		}
+		else {
+			
 		}
 	}
 }
