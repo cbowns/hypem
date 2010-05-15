@@ -218,15 +218,13 @@ foreach my $number (@count) {
 	my $record;
 	foreach my $line (@lines) {
 		chomp($line);
-		print "[$line]\n";
+		$line = nomWhiteSpace($line);
+
 		# run until we hit a newline; that's our record delimiter.
 		if ($line ne '' ) {
 			$record .= $line;
 			next;
 		}
-		
-		# now parse!
-		print "Got a full record! Parsing time.\n\n";
 		
 		# whatever I match here needs to slurp up newlines and/or convert them to plain ol' whitespace.
 		$line =~ /\W*id:\W*'(.*)'\W*ts:\W*'(.*)'\W*artist:\W*'(.*)'\W*song:\W*'(.*)'/;
@@ -254,7 +252,8 @@ foreach my $number (@count) {
 			undef ($id); undef ($time); undef ($song); undef ($artist); undef ($record);
 		}
 		else {
-			
+			$logger->error("Under the impression that I reached the end of a record, but I couldn't find the fields I wanted.");
+			$logger->warning($record);
 		}
 	}
 }
@@ -333,4 +332,19 @@ sub treeToArray {
 	}
 
 	return \@return;
+}
+
+# ----------------------------------------
+# remove white space from ends of a string
+# example from the Perl Cookbook, page 30.
+# ----------------------------------------
+sub nomWhiteSpace {
+	my ( $line ) = validate_pos( @_, 1 );
+	
+	my @toRet = @_;
+    for (@toRet) {
+        s/^\s+//;
+        s/\s+$//;
+    }
+    return wantarray ? @toRet : $toRet[0];
 }
