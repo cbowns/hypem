@@ -6,6 +6,7 @@ use Log::Log4perl(":easy");
 use strict;
 use warnings;
 use Params::Validate;
+use Switch;
 
 use XML::Parser;
 
@@ -191,7 +192,7 @@ foreach my $number (@count) {
 		close FILE;
 	}
 
-	my ($id, $artist, $song, $time);
+	my ($id, $artist, $song, $ts);
 	# Read all lines until $line is just a newline.
 	# Then parse out id, ts, artist, song.
 	my $record;
@@ -199,41 +200,41 @@ foreach my $number (@count) {
 		chomp($line);
 		$line = nomWhiteSpace($line);
 
+		$record .= $line . "\n";
+
 		# run until we hit a newline; that's our record delimiter.
-		if ($line ne '' ) {
-			$record .= $line;
-			next;
+		if ($line eq '' ) {
+			if ( !( $id and $ts and $song) ) {
+				$logger->error("I'm under the impression that I reached the end of a record, but I couldn't find the fields I wanted.");
+				$logger->error($record);
+			}
+			else {
+				my $row = {};
+
+				$row->{name} = trim("$artist - $song");
+
+				# strip backslashes out, now that we've got our final string.
+				$row->{name} =~ s/\\//g;
+				$row->{url} = "http://hypem.com/track/$id";
+				$row->{'date added'} = $ts;
+
+				$db->insert($row);
+				$logger->debug("Just inserted $row->{ID} for artist [$artist], song [$song], url [$row->{url}]");
+
+				undef ($id); undef ($ts); undef ($song); undef ($artist); undef ($record);
+			}
 		}
 		
 		# whatever I match here needs to slurp up newlines and/or convert them to plain ol' whitespace.
-		$line =~ /\W*id:\W*'(.*)'\W*ts:\W*'(.*)'\W*artist:\W*'(.*)'\W*song:\W*'(.*)'/;
-		# $record =~ /\W*id:\W*'(.*?)(?<!\\)'\W*ts:\W*'(.*?)(?<!\\)'\W*artist:\W*'(.*?)(?<!\\)'\W*song:\W*'(.*?)(?<!\\)'/s;
-		
-		$id = $1;
-		$time = $2;
-		$artist = $3;
-		$song = $4;
-		
-		if ($id and $time and $artist and $song) {
-			my $row = {};
 
-			$row->{name} = trim("$artist - $song");
-
-			# strip backslashes out. Silly Javascript.
-			$row->{name} =~ s/\\//g;
-
-			$row->{url} = "http://hypem.com/track/$id";
-
-			$row->{'date added'} = $time;
-
-			$db->insert($row);
-			$logger->debug("Just inserted $row->{ID} for artist [$artist], song [$song], url [$row->{url}]");
-
-			undef ($id); undef ($time); undef ($song); undef ($artist); undef ($record);
-		}
-		else {
-			$logger->error("Under the impression that I reached the end of a record, but I couldn't find the fields I wanted.");
-			$logger->warning($record);
+		if ( $line =~ /^\W*(song|ts|id|artist):\W*'(.*)',\W*$/ ) {
+			switch ($1) {
+				case "song"   { $song   = $2 }
+				case "ts"     { $ts     = $2 }
+				case "id"     { $id     = $2 }
+				case "artist" { $artist = $2 }
+				else          { $logger->warn("Fell through switch statement!"); }
+			}
 		}
 	}
 }
