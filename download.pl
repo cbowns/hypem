@@ -190,27 +190,6 @@ foreach my $number (@count) {
 		@lines = <FILE>;
 		close FILE;
 	}
-		# ==========================
-		# = parse the twitter html =
-		# ==========================
-		# JS record format:
-		# 			type:'normal',
-		# 			id:'1036102',
-		# 			postid:'1073828',
-		# 			time:'190',
-		# 			ts: '1265848553',
-		# 			fav:'0',
-		# 			key: '4c5079a33013ce653d6100a40447423a',
-		# 			imeem_id:'',
-		# 			artist:'Light Alive',
-		# 			song:'Trust Revenge',
-		# 			amazon:'',
-		# 			itunes:'',
-		# 			emusic:'',
-		# 			exact_track_avail:'0'
-		#
-
-		# ^ that's a newline. ^
 
 	my ($id, $artist, $song, $time);
 	# Read all lines until $line is just a newline.
