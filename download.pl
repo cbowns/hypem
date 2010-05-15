@@ -228,6 +228,7 @@ foreach my $number (@count) {
 		
 		# whatever I match here needs to slurp up newlines and/or convert them to plain ol' whitespace.
 		$line =~ /\W*id:\W*'(.*)'\W*ts:\W*'(.*)'\W*artist:\W*'(.*)'\W*song:\W*'(.*)'/;
+		# $record =~ /\W*id:\W*'(.*?)(?<!\\)'\W*ts:\W*'(.*?)(?<!\\)'\W*artist:\W*'(.*?)(?<!\\)'\W*song:\W*'(.*?)(?<!\\)'/s;
 		
 		$id = $1;
 		$time = $2;
