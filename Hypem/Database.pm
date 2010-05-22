@@ -235,7 +235,7 @@ sub URLsForID {
 
 	my @rowArray;
 	while ( my $hashRef = $preparedStatment->fetchrow_hashref() ) {
-		push(@rowArray, $hashRef->{url});
+		push( @rowArray, $hashRef->{url} );
 	}
 	return @rowArray;
 }
