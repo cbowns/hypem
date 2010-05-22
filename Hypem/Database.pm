@@ -115,7 +115,11 @@ sub insert {
 	$item->{ID} = $self->IDForName( $item->{name} );
 	if ( $item->{ID} ) {
 
-		# TODO see if the URL already exists too!
+		# if the url is in URLsForID($item->{ID}), just return.
+		my @urls = $self->URLsForID( $item->{ID} );
+		foreach my $url (@urls) {
+			return $item->{ID} if ( $url eq $item->{url} );
+		}
 		return $self->_addURLForItem($item);
 	}
 	else {
