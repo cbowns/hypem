@@ -118,7 +118,17 @@ sub insert {
 		# if the url is in URLsForID($item->{ID}), just return.
 		my @urls = $self->URLsForID( $item->{ID} );
 		foreach my $url (@urls) {
+
+			# naive match returns immediately.
 			return $item->{ID} if ( $url eq $item->{url} );
+
+	 # if the url matches according to basic matching rules, just return the id.
+	 # http://hypem.com/track/1108526
+	 # http://hypem.com/track/1108526/Iggy+Pop-The+Passenger
+			if ( $url =~ /(http:\/\/hypem\.com\/track\/[0-9]+).*/ ) {
+				print "DEBUG: $1\n";
+				return $item->{ID} if ( $1 eq $item->{url} );
+			}
 		}
 		return $self->_addURLForItem($item);
 	}
