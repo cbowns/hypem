@@ -109,6 +109,9 @@ Returns -1 on failure from either insert. You should probably die immediately be
 =cut
 
 sub insert {
+
+	# for the regex match
+	my $urlRegex = '(http:\/\/hypem\.com\/track\/[0-9]+).*';
 	my ( $self, $item ) = validate_pos( @_, 1, 1 );
 
 	# see if the item's name is already in the DB.
@@ -125,9 +128,8 @@ sub insert {
 	 # if the url matches according to basic matching rules, just return the id.
 	 # http://hypem.com/track/1108526
 	 # http://hypem.com/track/1108526/Iggy+Pop-The+Passenger
-			if ( $url =~ /(http:\/\/hypem\.com\/track\/[0-9]+).*/ ) {
-				print "DEBUG: $1\n";
-				return $item->{ID} if ( $1 eq $item->{url} );
+			if ( $url =~ /$urlRegex/ or $item->{url} =~ /$urlRegex/ ) {
+				return $item->{ID} if ( $1 eq $item->{url} or $1 eq $url );
 			}
 		}
 		return $self->_addURLForItem($item);
